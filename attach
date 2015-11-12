@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from xmlrpc.client import ServerProxy, Binary
+from os.path import basename
+import sys
+import trackit
+
+if __name__ == "__main__":
+    try:
+        config = trackit.Config("~/.tracrc")
+    except:
+        sys.exit(trackit.noconfig_msg())
+
+    p = ServerProxy(config.login)
+    ticketno = sys.argv[-1]
+    for filename in [_.strip() for _ in sys.stdin]:
+        filename = filename.strip();
+        with open(filename, "rb") as f:
+            p.ticket.putAttachment(ticketno, basename(filename), '', Binary(f.read()))
