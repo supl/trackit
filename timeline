@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from datetime import datetime, timedelta
+from time import sleep
+from xmlrpc.client import ServerProxy, Binary, DateTime
+import sys
+import trackit
+import time
+
+def main():
+    try:
+        config = trackit.Config("~/.tracrc")
+    except:
+        sys.exit(trackit.noconfig_msg())
+
+    p = ServerProxy(config.login)
+    since = None
+    while True:
+        now = datetime.now()
+        if since == None:
+            since = now - timedelta(minutes=5)
+
+        changes = []
+        for change in p.ticket.getRecentChanges(DateTime(since + timedelta(seconds=time.timezone))):
+            try:
+                (_, _, changed, attribute) = p.ticket.get(change)
+                (_, author) = p.ticket.changeLog(change)[-1][:2]
+                changed = datetime.strptime(changed.value, "%Y%m%dT%H:%M:%S") - timedelta(seconds=time.timezone)
+                changes.append((changed.strftime("%Y-%m-%d %H:%M:%S"), change, author, attribute["summary"]))
+            except:
+                pass
+
+        changes = sorted(changes, key=lambda x: x[0])
+        for _ in changes:
+            print("{} {} \033[0;33m{} \033[0;32m{}\033[0m".format(*_))
+
+        print(">", now.strftime("%Y-%m-%d %H:%M:%S"))
+        since = now
+        sleep(300)
+
+if __name__ == "__main__":
+    main()
