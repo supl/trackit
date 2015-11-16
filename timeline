@@ -15,11 +15,13 @@ def main():
         sys.exit(trackit.noconfig_msg())
 
     p = ServerProxy(config.login)
+
+    interval = 10 if len(sys.argv) <= 1 else int(sys.argv[1])
     since = None
     while True:
         now = datetime.now()
         if since == None:
-            since = now - timedelta(minutes=5)
+            since = now - timedelta(minutes=interval)
 
         changes = []
         for change in p.ticket.getRecentChanges(DateTime(since + timedelta(seconds=time.timezone))):
@@ -37,7 +39,7 @@ def main():
 
         print(">", now.strftime("%Y-%m-%d %H:%M:%S"))
         since = now
-        sleep(300)
+        sleep(interval*60)
 
 if __name__ == "__main__":
     main()
