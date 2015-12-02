@@ -37,7 +37,6 @@ def main():
         for _ in changes:
             print("{} {} \033[0;33m{} \033[0;32m{}\033[0m".format(*_))
 
-        print(">", now.strftime("%Y-%m-%d %H:%M:%S"))
         since = now
         sleep(interval*60)
 
